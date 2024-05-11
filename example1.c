@@ -19,7 +19,7 @@ int main(void) {
   student_enter(&student3);
 
   // dining is full. student 4 cannot enter.
-  pthread_create(&student4.thread, NULL, student_enter, &student4);
+  //pthread_create(&student4.thread, NULL, student_enter, &student4);
 
   // 0.1 seconds later
   msleep(100);

@@ -5,38 +5,76 @@
 #include "dining.h"
 #include "utils.h"
 
+void* student_thread(void* arg) {
+    student_t* student = (student_t*)arg;
+    student_enter(student);
+   // printf("Student entered the dining hall.\n");
+    msleep(2000); // Simulating student eating time
+    student_leave(student);
+    //printf("Student  left the dining hall.\n");
+    return NULL;
+}
+
+void* cleaning_thread(void* arg) {
+    cleaning_t* cleaning = (cleaning_t*)arg;
+    //printf("Cleaning service provider entered the dining hall.\n");
+    cleaning_enter(cleaning);
+   // printf("Cleaning service provider started cleaning.\n");
+    msleep(3000); // Simulating cleaning time
+    cleaning_leave(cleaning);
+    printf("Cleaning service provider left the dining hall.\n");
+    return NULL;
+}
+
 int main(void) {
-  dining_t* d = dining_init(3);
+    dining_t* d = dining_init(3);
 
-  student_t student1 = make_student(1, d);
-  student_t student2 = make_student(2, d);
-  cleaning_t cleaning = make_cleaning(1, d);
+    // Create students
+    student_t students[5];
+    for (int i = 0; i < 5; i++) {
+        students[i] = make_student(i + 1, d);
+    }
 
-  // student 1 comes in, can enter
-  student_enter(&student1);
+    // Create cleaners
+    cleaning_t cleaning1 = make_cleaning(1, d);
+    cleaning_t cleaning2 = make_cleaning(2, d);
 
-  // cleaning cannot enter because of student 1; this blocks
-  pthread_create(&cleaning.thread, NULL, cleaning_enter, &cleaning);
-  msleep(100);
+    // Students and cleaners enter and leave in a complex sequence
+    pthread_t student_threads[5];
+    pthread_t cleaning_threads[2];
 
-  // student 1 leaves
-  student_leave(&student1);
+    pthread_create(&student_threads[0], NULL, student_thread, &students[0]);
+    msleep(500); // To stagger student entry
 
-  // cleaning should begin now
-  pthread_join(cleaning.thread, NULL);
+    pthread_create(&cleaning_threads[0], NULL, cleaning_thread, &cleaning1);
+    msleep(500); // To ensure cleaning thread is blocked
 
-  // student 2 comes in but cannot enter because the cleaning is in progress
-  pthread_create(&student2.thread, NULL, student_enter, &student2);
+    pthread_create(&student_threads[1], NULL, student_thread, &students[1]);
+    msleep(500);
 
-  // 0.1 seconds later
-  msleep(100);
+    pthread_create(&cleaning_threads[1], NULL, cleaning_thread, &cleaning2);
+    msleep(500);
 
-  // cleaning completes
-  cleaning_leave(&cleaning);
+    pthread_create(&student_threads[2], NULL, student_thread, &students[2]);
+    msleep(500);
 
-  // now, student 2 should be able to enter
-  pthread_join(student2.thread, NULL);
-  student_leave(&student2);
+    pthread_create(&student_threads[3], NULL, student_thread, &students[3]);
+    msleep(500);
 
-  dining_destroy(&d);
+    pthread_create(&student_threads[4], NULL, student_thread, &students[4]);
+    msleep(500);
+
+    // Wait for all threads to finish
+    for (int i = 0; i < 5; i++) {
+        pthread_join(student_threads[i], NULL);
+    }
+
+    for (int i = 0; i < 2; i++) {
+        pthread_join(cleaning_threads[i], NULL);
+    }
+
+    // Destroy dining hall
+    dining_destroy(&d);
+
+    return 0;
 }

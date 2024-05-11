@@ -44,18 +44,13 @@ void dining_student_enter(dining_t *dining) {  // Need to have threads in here?
                                // no cleaning is occuring
     /*Check if cleaning is occuring */
     pthread_mutex_lock(&mutex);
-    while (dining->student_come_in_status == 1) {  // No new students can come
+    while (dining->student_come_in_status == 1 || dining->num_students == dining->capacity) {  // No new students can come
                                                    // in
       pthread_cond_wait(&cond, &mutex);
     }
-    /*Check if max capcity has been reached*/
-    while (dining->num_students == dining->capacity) {  // 0 1 2 - two students
-      pthread_cond_wait(&cond, &mutex);
-    }
-    dining
-        ->num_students++;  // Increase number of students present at dining hall
+    dining->num_students++;  // Increase number of students present at dining hall
     pthread_mutex_unlock(&mutex);
-    pthread_cond_signal(&cond);  // Let other threads know student came in
+    pthread_cond_broadcast(&cond);  // Let other threads know student came in
   }
 }
 
@@ -65,7 +60,7 @@ void dining_student_leave(dining_t *dining) {
     dining->num_students--;  // Decrease number of student present at dining
                              // hall
     pthread_mutex_unlock(&mutex);
-    pthread_cond_signal(&cond);  // Let other threads know number of students
+    pthread_cond_broadcast(&cond);  // Let other threads know number of students
                                  // has been decremented
   }
 }
@@ -83,15 +78,12 @@ void dining_cleaning_enter(
     dining_t *dining) {  // Block students and new cleaners
   pthread_mutex_lock(&mutex);
   dining->student_come_in_status = 1;
-  pthread_cond_signal(&cond);  // Signal no new students can come in
+  pthread_cond_broadcast(&cond);  // Signal no new students can come in
 
-  while (dining->cleaner_come_in_status == 1) {  // There is a cleaner already
+  while (dining->cleaner_come_in_status == 1 || dining->num_students > 0) {  // There is a cleaner already
     pthread_cond_wait(&cond, &mutex);
   }
   dining->cleaner_come_in_status = 1;  // No new cleaners can come in
-  while (dining->num_students != 0) {  // Wait for ALL students to leave
-    pthread_cond_wait(&cond, &mutex);
-  }
   pthread_mutex_unlock(&mutex);
 }
 
@@ -100,5 +92,5 @@ void dining_cleaning_leave(dining_t *dining) {
   dining->student_come_in_status = 0;  // Students can come in
   dining->cleaner_come_in_status = 0;  // Cleaners can come in
   pthread_mutex_unlock(&mutex);
-  pthread_cond_signal(&cond);  // Signal new cleaners can come in or students
+  pthread_cond_broadcast(&cond);  // Signal new cleaners can come in or students
 }
