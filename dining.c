@@ -78,22 +78,25 @@ provider can work in the dining hall at a time.
 // No new students can come in
 void dining_cleaning_enter(
     dining_t *dining) {  // Block students and new cleaners
-  dining->student_come_in_status = 1;
-  pthread_cond_broadcast(&cond);  // Signal no new students can come in
   pthread_mutex_lock(&mutex);
-
+  dining->student_come_in_status = 1;
+  pthread_cond_broadcast(&cond);
   while (dining->cleaner_come_in_status == 1 ||
          dining->num_students > 0) {  // There is a cleaner already
     pthread_cond_wait(&cond, &mutex);
   }
   dining->cleaner_come_in_status = 1;  // No new cleaners can come in
+  pthread_cond_broadcast(&cond);       // Signal no new students can come in
+
   pthread_mutex_unlock(&mutex);
 }
 
 void dining_cleaning_leave(dining_t *dining) {
   pthread_mutex_lock(&mutex);
-  dining->student_come_in_status = 0;  // Students can come in
   dining->cleaner_come_in_status = 0;  // Cleaners can come in
+  pthread_cond_broadcast(&cond);
+  dining->student_come_in_status = 0;  // Students can come in
+  pthread_cond_broadcast(&cond);
+
   pthread_mutex_unlock(&mutex);
-  pthread_cond_broadcast(&cond);  // Signal new cleaners can come in or students
 }
