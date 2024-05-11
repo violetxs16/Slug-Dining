@@ -1,6 +1,7 @@
 #include "dining.h"
 
 #include <pthread.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -79,14 +80,18 @@ provider can work in the dining hall at a time.
 void dining_cleaning_enter(
     dining_t *dining) {  // Block students and new cleaners
   pthread_mutex_lock(&mutex);
+  // fprintf(stderr, "After locking mutex\n");
+
   dining->student_come_in_status = 1;
-  pthread_cond_broadcast(&cond);
+  // pthread_cond_broadcast(&cond);
   while (dining->cleaner_come_in_status == 1 ||
          dining->num_students > 0) {  // There is a cleaner already
     pthread_cond_wait(&cond, &mutex);
   }
+  // fprintf(stderr, "After while loop\n");
   dining->cleaner_come_in_status = 1;  // No new cleaners can come in
   pthread_cond_broadcast(&cond);       // Signal no new students can come in
+  // fprintf(stderr, "After broadcasting cleaner condition\n");
 
   pthread_mutex_unlock(&mutex);
 }
