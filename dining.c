@@ -45,9 +45,8 @@ void dining_student_enter(dining_t *dining) {  // Need to have threads in here?
     /*Check if cleaning is occuring */
     pthread_mutex_lock(&mutex);
     while (dining->student_come_in_status == 1 ||
-           dining->num_students ==
-               dining->capacity) {  // No new students can come
-                                    // in
+           dining->num_students == dining->capacity) {  // No new students can
+                                                        // come in
       pthread_cond_wait(&cond, &mutex);
     }
     dining
@@ -79,9 +78,9 @@ provider can work in the dining hall at a time.
 // No new students can come in
 void dining_cleaning_enter(
     dining_t *dining) {  // Block students and new cleaners
-  pthread_mutex_lock(&mutex);
   dining->student_come_in_status = 1;
   pthread_cond_broadcast(&cond);  // Signal no new students can come in
+  pthread_mutex_lock(&mutex);
 
   while (dining->cleaner_come_in_status == 1 ||
          dining->num_students > 0) {  // There is a cleaner already
