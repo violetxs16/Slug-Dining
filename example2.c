@@ -42,17 +42,16 @@ int main(void) {
   // Students and cleaners enter and leave in a complex sequence
   pthread_t student_threads[5];
   pthread_t cleaning_threads[2];
+  pthread_create(&cleaning_threads[0], NULL, cleaning_thread, &cleaning1);
+  msleep(500);  // To ensure cleaning thread is blocked
+
+  pthread_create(&cleaning_threads[1], NULL, cleaning_thread, &cleaning2);
+  msleep(500);
 
   pthread_create(&student_threads[0], NULL, student_thread, &students[0]);
   msleep(500);  // To stagger student entry
 
-  pthread_create(&cleaning_threads[0], NULL, cleaning_thread, &cleaning1);
-  msleep(500);  // To ensure cleaning thread is blocked
-
   pthread_create(&student_threads[1], NULL, student_thread, &students[1]);
-  msleep(500);
-
-  pthread_create(&cleaning_threads[1], NULL, cleaning_thread, &cleaning2);
   msleep(500);
 
   pthread_create(&student_threads[2], NULL, student_thread, &students[2]);
