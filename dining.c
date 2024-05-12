@@ -85,8 +85,8 @@ void dining_cleaning_enter(
 
   pthread_mutex_lock(&mutex);
   dining->student_come_in_status = 1;  // Do not allow more students to come in
-  pthread_mutex_unlock(&mutex);
-  pthread_cond_broadcast(&cond);
+                                       // pthread_mutex_unlock(&mutex);
+                                       // pthread_cond_broadcast(&cond);
 
   pthread_mutex_lock(&mutex);
   while (dining->cleaner_come_in_status == 1 ||
@@ -96,7 +96,7 @@ void dining_cleaning_enter(
   dining->cleaner_come_in_status = 1;  // No new cleaners can come in
   // pthread_cond_signal(&cond);       // Signal no new students can come in
   pthread_mutex_unlock(&mutex);
-  // pthread_cond_broadcast(&cond);
+  pthread_cond_broadcast(&cond);
 }
 
 void dining_cleaning_leave(dining_t *dining) {
