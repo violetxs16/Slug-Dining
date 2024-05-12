@@ -55,7 +55,7 @@ void dining_student_enter(dining_t *dining) {  // Need to have threads in here?
     dining
         ->num_students++;  // Increase number of students present at dining hall
     pthread_mutex_unlock(&mutex);
-    // pthread_cond_broadcast(&cond);  // Let other threads know student came in
+    pthread_cond_broadcast(&cond);  // Let other threads know student came in
   }
 }
 
@@ -90,7 +90,7 @@ void dining_cleaning_enter(
     pthread_cond_wait(&cond, &mutex);
   }
   dining->cleaner_come_in_status = 1;  // No new cleaners can come in
-  pthread_cond_signal(&cond);          // Signal no new students can come in
+  // pthread_cond_signal(&cond);       // Signal no new students can come in
   pthread_mutex_unlock(&mutex);
   // pthread_cond_broadcast(&cond);
 }
