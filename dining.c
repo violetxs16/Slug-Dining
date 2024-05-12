@@ -102,5 +102,5 @@ void dining_cleaning_leave(dining_t *dining) {
   // pthread_cond_signal(&cond);
   dining->student_come_in_status = 0;  // Students can come in
   pthread_mutex_unlock(&mutex);
-  pthread_cond_signal(&cond);
+  pthread_cond_broadcast(&cond);
 }
