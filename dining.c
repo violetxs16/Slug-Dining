@@ -55,7 +55,7 @@ void dining_student_enter(dining_t *dining) {  // Need to have threads in here?
     dining
         ->num_students++;  // Increase number of students present at dining hall
     pthread_mutex_unlock(&mutex);
-    pthread_cond_broadcast(&cond);  // Let other threads know student came in
+   // pthread_cond_broadcast(&cond);  // Let other threads know student came in
   }
 }
 
@@ -65,7 +65,7 @@ void dining_student_leave(dining_t *dining) {
     dining->num_students--;  // Decrease number of student present at dining
                              // hall
     pthread_mutex_unlock(&mutex);
-    pthread_cond_broadcast(&cond);  // Let other threads know number of students
+    pthread_cond_signal(&cond);  // Let other threads know number of students
                                     // has been decremented
   }
 }
@@ -81,6 +81,7 @@ provider can work in the dining hall at a time.
 // No new students can come in
 void dining_cleaning_enter(
     dining_t *dining) {  // Block students and new cleaners
+  
   pthread_mutex_lock(&cleaner_mutex);//Cleaner mutex
   dining->cleaner_come_in_status = 1;  // No new cleaners can come in
 
@@ -100,20 +101,23 @@ void dining_cleaning_enter(
   dining->cleaner_come_in_status = 1;  // No new cleaners can come in
   // pthread_cond_signal(&cond);       // Signal no new students can come in
   pthread_mutex_unlock(&mutex);
+  pthread_cond_signal(&cond);
 }
 
 void dining_cleaning_leave(dining_t *dining) {
+  pthread_mutex_lock(&cleaner_mutex);//New cleaners can now come in
+  cleaner_present = 0; 
+  pthread_mutex_unlock(&cleaner_mutex);
+  pthread_cond_signal(&cond);
+
   pthread_mutex_lock(&mutex);
   dining->cleaner_come_in_status = 0;  // Cleaners can come in
 
   // pthread_cond_signal(&cond);
   dining->student_come_in_status = 0;  // Students can come in
   pthread_mutex_unlock(&mutex);
-  pthread_cond_signal(&cond);
+ // pthread_cond_signal(&cond);
 
-  pthread_mutex_lock(&cleaner_mutex);//New cleaners can now come in
-  cleaner_present = 0; 
-  pthread_mutex_unlock(&cleaner_mutex);
  // pthread_cond_signal(&cond);
 
 }
