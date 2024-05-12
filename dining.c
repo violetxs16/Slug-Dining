@@ -1,10 +1,12 @@
+
 #include "dining.h"
 
 #include <pthread.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t cleaner_mutex = PTHREAD_MUTEX_INITIALIZER;
+
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 
 typedef struct dining {
@@ -53,7 +55,7 @@ void dining_student_enter(dining_t *dining) {  // Need to have threads in here?
     dining
         ->num_students++;  // Increase number of students present at dining hall
     pthread_mutex_unlock(&mutex);
-    pthread_cond_broadcast(&cond);  // Let other threads know student came in
+    pthread_cond_signal(&cond);  // Let other threads know student came in
   }
 }
 
@@ -79,28 +81,26 @@ provider can work in the dining hall at a time.
 // No new students can come in
 void dining_cleaning_enter(
     dining_t *dining) {  // Block students and new cleaners
-  pthread_mutex_lock(&mutex);
-  // fprintf(stderr, "After locking mutex\n");
 
-  dining->student_come_in_status = 1;
-  // pthread_cond_broadcast(&cond);
+  pthread_mutex_lock(&mutex);
+  dining->student_come_in_status = 1;  // Do not allow more students to come in
+  pthread_cond_broadcast(&cond);
   while (dining->cleaner_come_in_status == 1 ||
          dining->num_students > 0) {  // There is a cleaner already
     pthread_cond_wait(&cond, &mutex);
   }
-  // fprintf(stderr, "After while loop\n");
   dining->cleaner_come_in_status = 1;  // No new cleaners can come in
-  pthread_cond_broadcast(&cond);       // Signal no new students can come in
-  // fprintf(stderr, "After broadcasting cleaner condition\n");
-
+  // pthread_cond_signal(&cond);       // Signal no new students can come in
   pthread_mutex_unlock(&mutex);
+  // pthread_cond_broadcast(&cond);
 }
 
 void dining_cleaning_leave(dining_t *dining) {
   pthread_mutex_lock(&mutex);
   dining->cleaner_come_in_status = 0;  // Cleaners can come in
-  pthread_cond_broadcast(&cond);
+
+  // pthread_cond_signal(&cond);
   dining->student_come_in_status = 0;  // Students can come in
   pthread_mutex_unlock(&mutex);
-  pthread_cond_broadcast(&cond);
+  pthread_cond_signal(&cond);
 }
