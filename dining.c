@@ -15,7 +15,9 @@ typedef struct dining {
   int student_come_in_status;
   int cleaner_come_in_status;
 } dining_t;
-
+/*
+Create a new dining hall with specified capacity
+*/
 dining_t *dining_init(int capacity) {
   dining_t *dining = malloc(sizeof(dining_t));
   dining->capacity = capacity;
@@ -26,23 +28,20 @@ dining_t *dining_init(int capacity) {
   dining->cleaner_come_in_status = 0;
   return dining;
 }
+/*
+Dining destroy function destroys the dining hall. All memory associated with dining hall is already freed.
+*/
 void dining_destroy(dining_t **dining) {
   free(*dining);
   *dining = NULL;
 }
-
-void dining_student_enter(dining_t *dining) {  // Need to have threads in here?
-  // will have case of capacity == 0?
-  // We can only have one thread operate on the dining hall at a time, must lock
-  // the dining hall
-
-  /*
-  void dining_student_enter(dining_t* dining) is called when a student at the
+/*
+  Dining student enter function is called when a student at the
   reception wants to enter the dining hall. If there is a room in the dining
   hall, this function returns. If students cannot enter the dining hall, this
   function blocks until it becomes possible to enter.
   */
-  // Need to check capacity
+void dining_student_enter(dining_t *dining) {  
   if (dining->capacity > 0) {  // If capacity is zero no students can enter and
                                // no cleaning is occuring
     /*Check if cleaning is occuring */
@@ -55,10 +54,12 @@ void dining_student_enter(dining_t *dining) {  // Need to have threads in here?
     dining
         ->num_students++;  // Increase number of students present at dining hall
     pthread_mutex_unlock(&mutex);
-    // pthread_cond_broadcast(&cond);  // Let other threads know student came in
   }
 }
-
+/*
+Dining student leave function decrements the number of students in the dining hall and
+signals to other threads waiting for a student to leave condition
+*/
 void dining_student_leave(dining_t *dining) {
   if (dining->num_students > 0) {  // Must have atleast one student
     pthread_mutex_lock(&mutex);
@@ -70,15 +71,10 @@ void dining_student_leave(dining_t *dining) {
   }
 }
 /*
-Sometimes, the cleaning service provider comes in to clean the dining hall and
-calls void dining_cleaning_enter(dining_t* dining). Because they use chemicals
-during the process, students cannot be in the dining hall while the cleaning is
-taking place. The function blocks until all students leave. Once the cleaning
+Cleaning enter function blocks until all students leave. Once the cleaning
 has begun, students cannot enter the dining hall. Only one cleaning service
 provider can work in the dining hall at a time.
 */
-// Need to wait till all students leave
-// No new students can come in
 void dining_cleaning_enter(
     dining_t *dining) {  // Block students and new cleaners
 
@@ -90,21 +86,17 @@ void dining_cleaning_enter(
     pthread_cond_wait(&cond, &mutex);
   }
   dining->cleaner_come_in_status = 1;  // No new cleaners can come in
-  // pthread_cond_signal(&cond);
   dining->student_come_in_status = 1;  // Do not allow more students to come in
   pthread_cond_broadcast(&cond);
   // Signal no new students can come in
   pthread_mutex_unlock(&mutex);
-  // pthread_cond_signal(&cond);
-  //  pthread_cond_broadcast(&cond);
 }
 
 void dining_cleaning_leave(dining_t *dining) {
   pthread_mutex_lock(&mutex);
   dining->cleaner_come_in_status = 0;  // Cleaners can come in
 
-  // pthread_cond_signal(&cond);
   dining->student_come_in_status = 0;  // Students can come in
   pthread_mutex_unlock(&mutex);
-  pthread_cond_signal(&cond);
+  pthread_cond_signal(&cond); //Signal condition
 }
