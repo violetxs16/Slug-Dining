@@ -2,10 +2,10 @@
 <b> Status: Complete </b>
 
 1) <b>About: </b> 
-This project involves implementing a dining hall management system in C that uses synchronization mechanisms to control access to the dining hall. The system needs to handle students entering and leaving the dining hall while ensuring only a certain number of students can be inside at a time. Additionally, it must manage a cleaning service that requires the dining hall to be empty before it can begin cleaning. 
+This project involves implementing a multithreaded dining hall management system in C that uses POSIX threads for efficiency and synchronization mechanisms to control access to the dining hall. The system needs to handle students entering and leaving the dining hall while ensuring only a certain number of students can be inside at a time. Additionally, it must manage a cleaning service that requires the dining hall to be empty before it can begin cleaning. 
 
 2) <b> Dependencies: </b>
-pthread library for mutexes and condition variables
+pthread library for mutexes, condition variables and thread creation & manipulation
 clang-format for formatting the code
 stdlib library for memory allocation
 
