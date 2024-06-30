@@ -10,7 +10,7 @@ clang-format for formatting the code
 stdlib library for memory allocation
 
 3) <b> Build and Run: </b>
-    Step 1: Reopen program in container
+    Step 1: Reopen the program in a container
     Step 2: run make
     Step 4: run ./example1 or ./example2
 4) <b> Languages used: </b>
