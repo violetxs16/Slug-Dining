@@ -58,7 +58,7 @@ void dining_student_enter(dining_t *dining) {
 }
 /*
 Dining student leave function decrements the number of students in the dining hall and
-signals to other threads waiting for a student to leave condition
+signals to other threads waiting for a student to leave conditiong.
 */
 void dining_student_leave(dining_t *dining) {
   if (dining->num_students > 0) {  // Must have atleast one student

@@ -8,21 +8,21 @@
 void* student_thread(void* arg) {
   student_t* student = (student_t*)arg;
   student_enter(student);
-  // printf("Student entered the dining hall.\n");
+  printf("Student entered the dining hall.\n");
   msleep(2000);  // Simulating student eating time
   student_leave(student);
-  // printf("Student  left the dining hall.\n");
+  printf("Student  left the dining hall.\n");
   return NULL;
 }
 
 void* cleaning_thread(void* arg) {
   cleaning_t* cleaning = (cleaning_t*)arg;
-  // printf("Cleaning service provider entered the dining hall.\n");
+  printf("Cleaning service provider entered the dining hall.\n");
   cleaning_enter(cleaning);
-  // printf("Cleaning service provider started cleaning.\n");
+  printf("Cleaning service provider started cleaning.\n");
   msleep(3000);  // Simulating cleaning time
   cleaning_leave(cleaning);
-  // printf("Cleaning service provider left the dining hall.\n");
+  printf("Cleaning service provider left the dining hall.\n");
   return NULL;
 }
 
